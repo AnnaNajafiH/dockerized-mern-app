@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import Item from './models/item.js'; 
 
 // Load environment variables
 dotenv.config();
@@ -51,14 +52,7 @@ const connectWithRetry = async () => {
   process.exit(1);
 };
 
-// Define a simple item schema and model
-const ItemSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: { type: String },
-  createdAt: { type: Date, default: Date.now }
-});
 
-const Item = mongoose.model('Item', ItemSchema);
 
 // API Routes
 // Get all items
