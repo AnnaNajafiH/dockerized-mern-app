@@ -73,15 +73,14 @@ backend/                 # Node.js Express backend
   ├── routes/            # API routes
   ├── Dockerfile         # Backend container configuration
   └── server.js          # Entry point
-frontend/                # React frontend
-  ├── frontend/          # React application code
-  │   ├── src/           # React source code
-  │   │   ├── components/  # React components
-  │   │   ├── context/     # React context (state management)
-  │   │   └── services/    # API services
-  │   └── vite.config.js # Vite configuration
+client/                  # React frontend application
+  ├── src/               # React source code
+  │   ├── components/    # React components
+  │   ├── context/       # React context (state management)
+  │   └── services/      # API services
   ├── Dockerfile         # Frontend container configuration
-  └── nginx.conf         # Nginx web server configuration
+  ├── nginx.conf         # Nginx web server configuration
+  └── vite.config.js     # Vite configuration
 ```
 
 ## 🔧 API Endpoints

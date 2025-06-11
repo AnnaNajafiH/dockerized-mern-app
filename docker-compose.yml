@@ -35,10 +35,10 @@ services:  # MongoDB service
     networks:
       - app_network
 
-      # Frontend service  
+    # Frontend service  
   frontend:
     build:
-      context: ./frontend
+      context: ./client
       dockerfile: Dockerfile
     container_name: frontend
     restart: always
