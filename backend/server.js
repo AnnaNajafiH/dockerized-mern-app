@@ -1,63 +1,24 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { connectWithRetry, closeConnection } from './database/database.js';
 import itemRouter from './routes/itemRouter.js';
 
-// Load environment variables
 dotenv.config();
 
-// Initialize Express app
 const app = express();
 
-// Middleware
 app.use(express.json());
-// Configure CORS to allow requests from the React frontend
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://frontend'], // React frontend URLs
+  origin: ['http://localhost:3000', 'http://frontend'], 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
 
-// Connect to MongoDB with retry logic
-const connectWithRetry = async () => {
-  const MAX_RETRIES = 5;
-  let retries = 0;
-  
-  while (retries < MAX_RETRIES) {
-    try {
-      await mongoose.connect(process.env.MONGO_URI, {
-        serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-        socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
-        // Add more robust connection options
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        heartbeatFrequencyMS: 10000, // Check connection status every 10 seconds
-        family: 4, // Use IPv4, skip IPv6 to avoid issues
-      });
-      console.log('MongoDB connected successfully');
-      // Explicitly start server after successful connection
-      startServer();
-      return;
-    } catch (err) {
-      retries += 1;
-      console.log(`MongoDB connection attempt ${retries} failed: ${err.message}`);
-      // Wait for backoff time before next try
-      await new Promise(resolve => setTimeout(resolve, 5000));
-    }
-  }
-  
-  console.error('Could not connect to MongoDB after multiple retries');
-  process.exit(1);
-};
-
-
-
 // API Routes
 app.use('/api/items', itemRouter);
-
-
 
 // Root route
 app.get('/', (req, res) => {
@@ -97,8 +58,8 @@ const startServer = () => {
     server.close(() => {
       console.log('HTTP server closed');
       
-      // Then close the database connection
-      mongoose.connection.close(false)
+      // Then close the database connection using the imported function
+      closeConnection()
         .then(() => {
           console.log('MongoDB connection closed');
           clearTimeout(forceExitTimeout);
@@ -128,5 +89,15 @@ const startServer = () => {
   });
 };
 
-// Start MongoDB connection and then the server
-connectWithRetry();
+// Initialize application
+const init = async () => {
+  const dbConnected = await connectWithRetry();
+  if (dbConnected) {
+    startServer();
+  } else {
+    process.exit(1);
+  }
+};
+
+// Start the application
+init();
