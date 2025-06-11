@@ -1,0 +1,60 @@
+
+services:  # MongoDB service
+  mongo:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - app_network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 120s  # Ping every 2 minutes
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+  # Backend API service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: always
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/minirestapi
+      - NODE_ENV=production
+    ports:
+      - "5000:5000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - app_network
+
+      # Frontend service  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: always
+    environment:
+      - VITE_API_URL=http://backend:5000/api
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+# ✅ Define volumes
+volumes:
+  mongo_data:
+
+# ✅ Define the network
+networks:
+  app_network:
