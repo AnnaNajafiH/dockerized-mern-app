@@ -38,7 +38,7 @@ services:  # MongoDB service
     # Frontend service  
   frontend:
     build:
-      context: ./client
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: frontend
     restart: always
