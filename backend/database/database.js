@@ -11,13 +11,13 @@ const connectWithRetry = async () => {
   while (retries < MAX_RETRIES) {
     try {
       await mongoose.connect(process.env.MONGO_URI, {
-        serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-        socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
-        // Add more robust connection options
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        heartbeatFrequencyMS: 10000, // Check connection status every 10 seconds
-        family: 4, // Use IPv4, skip IPv6 to avoid issues
+        serverSelectionTimeoutMS: 5000, // Wait only 5 seconds to find the database server.
+        socketTimeoutMS: 45000, // If the database stops responding for 45 seconds, close the connection(sockets).
+        useNewUrlParser: true,   // Use the newer and better way to read the MongoDB connection string (URL).
+        useUnifiedTopology: true,  //Use MongoDB's new connection engine.
+        heartbeatFrequencyMS: 10000, // Every 10 seconds, check if the database connection is still alive.
+        family: 4, // Only use IPv4 (like 192.168.1.1), skip IPv6 to connect to the database and avoid issues
+  
       });
       console.log('MongoDB connected successfully');
       return true;
